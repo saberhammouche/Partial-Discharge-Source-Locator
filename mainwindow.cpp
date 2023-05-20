@@ -8,6 +8,16 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    setup();
+}
+
+MainWindow::~MainWindow()
+{
+    delete ui;
+}
+
+void MainWindow::setup()
+{
     ui->epaisseur->setEnabled(false);
     m_square = new QGraphicsRectItem(0, 0, 0, 0);
     capteur1 = new QGraphicsRectItem(0, 0, 0, 0);
@@ -40,20 +50,19 @@ MainWindow::MainWindow(QWidget *parent)
     circle2 = new QGraphicsEllipseItem(0,0,0,0);
     circle3 = new QGraphicsEllipseItem(0,0,0,0);
 
-
     chartView  = new QtCharts::QChartView(chart1);
     chartView->setRenderHint(QPainter::Antialiasing);
-    chartView->setFixedSize(500,200);
+    chartView->setFixedSize(500,180);
     ui->frame_chart_cap1->layout()->addWidget(chartView);
     ui->frame_chart_cap1->setContentsMargins(0, 0, 0, 0);
     chartView1 = new QtCharts::QChartView(chart2);
     chartView1->setRenderHint(QPainter::Antialiasing);
-    chartView1->setFixedSize(500,200);
+    chartView1->setFixedSize(500,180);
     ui->frame_chart_cap2->layout()->addWidget(chartView1);
     ui->frame_chart_cap2->setContentsMargins(0, 0, 0, 0);
     chartView2 = new QtCharts::QChartView(chart3);
     chartView2->setRenderHint(QPainter::Antialiasing);
-    chartView2->setFixedSize(500,200);
+    chartView2->setFixedSize(500,180);
     ui->frame_chart_cap3->layout()->addWidget(chartView2);
     ui->frame_chart_cap3->setContentsMargins(0, 0, 0, 0);
     dp = new QGraphicsRectItem(0,0,0,0);
@@ -65,11 +74,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->lineEdit_r1->setReadOnly(true);
     ui->lineEdit_r2->setReadOnly(true);
     ui->lineEdit_r3->setReadOnly(true);
-}
-
-MainWindow::~MainWindow()
-{
-    delete ui;
+    ui->verticalLayout_11->setProperty("isSpacer", true);
 }
 
 void MainWindow::creatSquare(int width, int hight)
@@ -145,6 +150,17 @@ QGenericMatrix<1, 2, double> MainWindow::calculateDP()
     return result;
 }
 
+void MainWindow::calculateError()
+{
+    if(ui->doubleSpinBox_X->value() == 0 || ui->doubleSpinBox_X->value() == 0)
+        return;
+    double locationError = std::sqrt(pow((DPpoint.x() - ui->doubleSpinBox_X->value()),2)+pow(DPpoint.y() - ui->doubleSpinBox_Y->value(),2));
+    ui->lineEdit_3->setText(QString::number(locationError,'f',3));
+    double percentageError = 100 * locationError / (std::sqrt(pow(m_width,2)+pow(m_height,2)));
+    ui->lineEdit_4->setText(QString::number(percentageError,'f',3));
+}
+
+
 void MainWindow::drowCircles()
 {
     double r1 = calculateDistance(QPointF(capteur1->rect().x() + 5,capteur1->rect().y()+5),
@@ -153,9 +169,9 @@ void MainWindow::drowCircles()
                            , QPointF(DPpoint.x()*m_Rsquare->rect().width()/ m_width,DPpoint.y()*m_Rsquare->rect().height()/m_height));
     double r3 = calculateDistance(QPointF(capteur3->rect().x() + 5,capteur3->rect().y()+5)
                            , QPointF(DPpoint.x()*m_Rsquare->rect().width()/ m_width,DPpoint.y()*m_Rsquare->rect().height()/m_height));
-    ui->lineEdit_r1->setText(QString::number(r1));
-    ui->lineEdit_r2->setText(QString::number(r2));
-    ui->lineEdit_r3->setText(QString::number(r3));
+    ui->lineEdit_r1->setText(QString::number(r1,'f',2));
+    ui->lineEdit_r2->setText(QString::number(r2,'f',2));
+    ui->lineEdit_r3->setText(QString::number(r3,'f',2));
 
 
     circle1->setRect(
@@ -288,6 +304,7 @@ void MainWindow::save()
 
     settings.endGroup();
     QMessageBox::information(nullptr, "Saved", "The file is saved under name : " + fileName );
+    setFiles();
 }
 
 void MainWindow::open(QString filename)
@@ -376,26 +393,8 @@ void MainWindow::deleteFile(QString filename)
         QMessageBox::information(nullptr, "Deleteing a file", "The file : "+ filename + " is deleted !");
     }
 
-    deleteGroup(filename,settings);
-}
-
-
-void MainWindow::deleteGroup(const QString& group, QSettings& settings)
-{
-    settings.beginGroup(group);
-    QStringList keys = settings.childKeys();
-
-    foreach(const QString& key, keys) {
-        settings.remove(key);
-    }
-
-    QStringList childGroups = settings.childGroups();
-    foreach(const QString& childGroup, childGroups) {
-        QString nestedGroup = group + "/" + childGroup;
-        deleteGroup(nestedGroup, settings);
-    }
-
-    settings.endGroup();
+    settings.remove(filename);
+    setFiles();
 }
 
 void MainWindow::setCapteurData(QString txt, int c)
@@ -519,8 +518,6 @@ void MainWindow::setCapteurData(QString txt, int c)
         chart2->setTitle("Chart Title");
         chart2->legend()->setVisible(false);
         chart2->legend()->setAlignment(Qt::AlignBottom);
-        chartView1->setRenderHint(QPainter::Antialiasing);
-        chartView1->setFixedSize(500,200);
 
         auto minIt = std::min_element(yData2.begin(), yData2.end());
         auto maxIt = std::max_element(yData2.begin(), yData2.end());
@@ -604,20 +601,21 @@ void MainWindow::setCapteurData(QString txt, int c)
 
         minValue3 = *minIt;
         maxValue3 = *maxIt;
+        double timedv = xData3[yData3.indexOf(maxValue3)];
         ui->label_max_3->setText(QString::number(maxValue3));
         ui->label_min_3->setText(QString::number(minValue3));
         ui->label_temp_3->setText(QString::number(qMax(xData3.first(),xData3.last())));
-        ui->doubleSpinBox_3->setValue(ui->label_dv_3->text().toDouble());
+        ui->doubleSpinBox_3->setValue(timedv);
         ui->label_sampels_3->setText(QString::number(xData3.size()-1));
-        ui->label_dv_3->setText(QString::number(xData3[yData3.indexOf(maxValue3)]));
+        ui->label_dv_3->setText(QString::number(timedv));
         QtCharts::QLineSeries *linepd = new QtCharts::QLineSeries();
 
         // Add two points to the series with the same x-coordinate and different y-coordinates
         linepd->append(10, maxValue3);
         linepd->append(10, minValue3);
 
-        linedv3->append(ui->label_dv_3->text().toDouble(), maxValue3);
-        linedv3->append(ui->label_dv_3->text().toDouble(), minValue3);
+        linedv3->append(timedv, maxValue3);
+        linedv3->append(timedv, minValue3);
 
         QPen Pen4(QColor("orange"));
         Pen4.setWidth(1);
@@ -641,15 +639,30 @@ void MainWindow::setCapteurData(QString txt, int c)
 
 void MainWindow::setFiles()
 {
+    // clearing the scroll area
+    QLayout* layout = ui->scrollAreaWidgetContents->layout();
+    QLayoutItem* item;
+    while ((item = layout->takeAt(0)) != nullptr) {
+        item->widget()->deleteLater();
+        delete item;
+    }
+    QSpacerItem* spacer = new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Expanding);
+    layout->addItem(spacer);
+
     QSettings settings(QCoreApplication::applicationDirPath()+"/files.ini",QSettings::IniFormat);
     QStringList files = settings.childGroups();
-    if(files.isEmpty())
-        files << "sim1" <<"project 1" << "ben tamo";
+    QMenu *subMenu = new QMenu(this);
+    ui->actionouvrir->setMenu(subMenu);
     foreach (QString file, files) {
         filesForm *filef = new filesForm (file,this);
+        QAction *openAction = new QAction(file,this);
+        subMenu->addAction(openAction);
+        connect(openAction, &QAction::triggered, [=]() {
+            open(file);
+        });
         connect(filef,&filesForm::open,this,&MainWindow::open);
         connect(filef,&filesForm::deleteFile,this,&MainWindow::deleteFile);
-        ui->scrollAreaWidgetContents->layout()->addWidget(filef);
+        layout->addWidget(filef);
     }
 }
 
@@ -1458,7 +1471,6 @@ void MainWindow::on_doubleSpinBox_2_valueChanged(double arg1)
     ui->label_dvman_2->setText(QString::number(yData2[index],'f',5));
 }
 
-
 void MainWindow::on_pushButton_3_clicked()
 {
     ui->frame_reslta->show();
@@ -1469,32 +1481,6 @@ void MainWindow::on_pushButton_3_clicked()
     QTimer *timer = new QTimer;
     connect(timer, &QTimer::timeout,this,&MainWindow::showResultat);
     timer->start(1000);
-}
-
-
-void MainWindow::on_pushButton_13_clicked()
-{
-    const double* data = calculateDP().constData();
-    DPpoint.setX(data[0]);
-    DPpoint.setY(data[1]);
-
-    ui->lineEditxDP->setText(QString::number(data[0]));
-    ui->lineEdityDP->setText(QString::number(data[1]));
-
-    dp->setRect(DPpoint.x()*(600/m_width), DPpoint.y()*(600/m_height), 5, 5);
-
-    QPen pen(Qt::black);
-    pen.setWidth(1);
-    dp->setPen(pen);
-    dp->setBrush(QColor(Qt::red));
-    m_Rscene->addItem(dp);
-    m_Rscene->update();
-}
-
-
-void MainWindow::on_pushButton_14_clicked()
-{
-    drowCircles();
 }
 
 
@@ -1577,10 +1563,21 @@ void MainWindow::showResultat()
         m_Rscene->addItem(dp);
         m_Rscene->update();
         drowCircles();
-/*            on_checkBox_2_stateChanged(0);
+        on_checkBox_2_stateChanged(0);
         QTimer *timer = dynamic_cast<QTimer *>(sender());
-        timer->stop();*/
+        timer->stop();
     }
 }
 
+
+
+void MainWindow::on_doubleSpinBox_X_valueChanged(double arg1)
+{
+    calculateError();
+}
+
+void MainWindow::on_doubleSpinBox_Y_valueChanged(double arg1)
+{
+    calculateError();
+}
 

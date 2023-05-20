@@ -14,6 +14,7 @@
 #include <QtCharts/QChartView>
 #include <QDebug>
 #include <algorithm>
+#include <cmath>
 #include <QGenericMatrix>
 #include <QInputDialog>
 #include <QMessageBox>
@@ -33,8 +34,10 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    void setup();
     void creatSquare(int width,int hight);
     QGenericMatrix<1, 2, double> calculateDP();
+    void calculateError();
     void drowCircles();
     void save();
     void open(QString filename);
@@ -42,7 +45,6 @@ public:
     void setCapteurData(QString txt,int c);
     void setFiles();
     QString convertTableToString(const QTableWidget *tableWidget);
-    void deleteGroup(const QString& group, QSettings& settings);
     void clearChart(QtCharts::QChart *chart);
     double calculateDistance(const QPointF& point1, const QPointF& point2);
 
@@ -89,15 +91,15 @@ private slots:
     void on_doubleSpinBox_3_valueChanged(double arg1);
     void on_doubleSpinBox_2_valueChanged(double arg1);
     void on_pushButton_3_clicked();
-    void on_pushButton_13_clicked();
-    void on_pushButton_14_clicked();
     void on_actionSave_triggered();
     void on_toolButton_4_clicked();
-
     void on_checkBox_stateChanged(int arg1);
-
     void on_checkBox_2_stateChanged(int arg1);
     void showResultat();
+
+    void on_doubleSpinBox_X_valueChanged(double arg1);
+
+    void on_doubleSpinBox_Y_valueChanged(double arg1);
 
 private:
     Ui::MainWindow *ui;

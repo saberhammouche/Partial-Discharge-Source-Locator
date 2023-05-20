@@ -21,8 +21,8 @@ set(PROJECT_SOURCES
         mainwindow.h
         mainwindow.ui
         filesform.h 
-		filesform.cpp 
-		filesform.ui
+        filesform.cpp
+        filesform.ui
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
