@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>about</class>
+ <widget class="QWidget" name="about">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>664</width>
+    <height>320</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QLabel" name="label">
+     <property name="font">
+      <font>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>à propos</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="label_2">
+     <property name="text">
+      <string>Localisateur de Sources de Décharges Partielles
+Version 0.1
+
+Bienvenue dans le Localisateur de Sources de Décharges Partielles ! Ce logiciel est une project fin d'étude open source  conçu pour aider à localiser les sources de décharges partielles dans les systèmes électriques. Le Localisateur de Sources de Décharges Partielles est un logiciel développé à des fins éducatives et de recherche. Il n'est pas destiné à une utilisation professionnelle ou à des applications critiques. Le créateur de ce logiciel décline toute responsabilité quant aux conséquences découlant de son utilisation.
+
+Ce logiciel est un projet pfe développé par Saber Hammouche à l'IMSI de l'Université d'Oran 2. Il fait partie des activités de recherche et académiques en cours menées par le corps enseignant et les étudiants.
+
+Équipe de développement :
+- saber HAMMOUCHE  -- using Qt open source 
+
+Nous souhaitons exprimer notre gratitude à la communauté open-source pour ses contributions inestimables et son soutien.</string>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

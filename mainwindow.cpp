@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 #include "dialogaddmat.h"
+#include "about.h"
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -115,7 +116,6 @@ QGenericMatrix<1, 2, double> MainWindow::calculateDP()
     double r2 = huileMap.value(ui->materiauxHuile->currentText()) * ui->label_dv_2->text().toDouble() / 1000;     // mm
     double r3 = huileMap.value(ui->materiauxHuile->currentText()) * ui->label_dv_3->text().toDouble() / 1000;     // mm
 
-
     QGenericMatrix<2, 2, double> A;
     QGenericMatrix<1, 2, double> b;
     QGenericMatrix<2, 2, double> a_inv;
@@ -154,7 +154,8 @@ void MainWindow::calculateError()
 {
     if(ui->doubleSpinBox_X->value() == 0 || ui->doubleSpinBox_X->value() == 0)
         return;
-    double locationError = std::sqrt(pow((DPpoint.x() - ui->doubleSpinBox_X->value()),2)+pow(DPpoint.y() - ui->doubleSpinBox_Y->value(),2));
+    double locationError = std::sqrt(pow((DPpoint.x() - ui->doubleSpinBox_X->value()),2)
+                                     +pow(DPpoint.y() - ui->doubleSpinBox_Y->value(),2));
     ui->lineEdit_3->setText(QString::number(locationError,'f',3));
     double percentageError = 100 * locationError / (std::sqrt(pow(m_width,2)+pow(m_height,2)));
     ui->lineEdit_4->setText(QString::number(percentageError,'f',3));
@@ -164,11 +165,14 @@ void MainWindow::calculateError()
 void MainWindow::drowCircles()
 {
     double r1 = calculateDistance(QPointF(capteur1->rect().x() + 5,capteur1->rect().y()+5),
-                            QPointF(DPpoint.x()*m_Rsquare->rect().width()/ m_width,DPpoint.y()*m_Rsquare->rect().height()/m_height));
+                            QPointF(DPpoint.x()*m_Rsquare->rect().width()/
+                                    m_width,DPpoint.y()*m_Rsquare->rect().height()/m_height));
     double r2 = calculateDistance(QPointF(capteur2->rect().x() + 5,capteur2->rect().y()+5)
-                           , QPointF(DPpoint.x()*m_Rsquare->rect().width()/ m_width,DPpoint.y()*m_Rsquare->rect().height()/m_height));
+                           , QPointF(DPpoint.x()*m_Rsquare->rect().width()/
+                                     m_width,DPpoint.y()*m_Rsquare->rect().height()/m_height));
     double r3 = calculateDistance(QPointF(capteur3->rect().x() + 5,capteur3->rect().y()+5)
-                           , QPointF(DPpoint.x()*m_Rsquare->rect().width()/ m_width,DPpoint.y()*m_Rsquare->rect().height()/m_height));
+                           , QPointF(DPpoint.x()*m_Rsquare->rect().width()/
+                                     m_width,DPpoint.y()*m_Rsquare->rect().height()/m_height));
     ui->lineEdit_r1->setText(QString::number(r1,'f',2));
     ui->lineEdit_r2->setText(QString::number(r2,'f',2));
     ui->lineEdit_r3->setText(QString::number(r3,'f',2));
@@ -208,15 +212,17 @@ void MainWindow::save()
     QString fileName = QInputDialog::getText(nullptr, "Save file", "Enter file name:", QLineEdit::Normal, "", &ok);
 
     if(!ok||fileName.isEmpty()){
-        QMessageBox::warning(nullptr, "Warning", "The file is not saved !");
+        QMessageBox::warning(nullptr, "Save file", "The file is not saved !");
         return;
     }
     if(settings.childGroups().contains(fileName)){
         QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(nullptr,"File exists", "This file name already exists. Do you want to overwrite it?", QMessageBox::Yes | QMessageBox::No);
+        reply = QMessageBox::question(nullptr,"File exists!",
+                                      "This file name already exists. Do you want to overwrite it?",
+                                      QMessageBox::Yes | QMessageBox::No);
 
         if (reply == QMessageBox::No) {
-            QMessageBox::warning(nullptr, "Warning", "The file is not saved !");
+            QMessageBox::warning(nullptr, "Save file", "The file is not saved !");
             return;
         }
     }
@@ -314,7 +320,6 @@ void MainWindow::open(QString filename)
         QMessageBox::critical(nullptr,"File not found", "We cant find this file " + filename, QMessageBox::Ok);
         return;
     }
-
     xData.clear();
     yData.clear();
     xData2.clear();
@@ -324,10 +329,6 @@ void MainWindow::open(QString filename)
     ui->tableWidget->clear();
     ui->tableWidget_2->clear();
     ui->tableWidget_3->clear();
-
-
-
-
 
     settings.beginGroup(filename);
 
@@ -410,7 +411,9 @@ void MainWindow::setCapteurData(QString txt, int c)
             xData.append(fields[0].toDouble());
             yData.append(fields[1].toDouble());
         }
-        clearChart(chart1);
+        //clearChart(chart1);
+        chart1 = new QtCharts::QChart();
+        chartView->setChart(chart1);
         ui->tableWidget->setRowCount(yData.size());
         ui->tableWidget->setColumnCount(2);
         ui->tableWidget->setHorizontalHeaderLabels({"temps", "Magnitude"});
@@ -447,20 +450,22 @@ void MainWindow::setCapteurData(QString txt, int c)
 
         minValue = *minIt;
         maxValue = *maxIt;
+        double dvtime = xData[yData.indexOf(maxValue)];
+
         ui->label_max->setText(QString::number(maxValue));
         ui->label_min->setText(QString::number(minValue));
         ui->label_temp->setText(QString::number(qMax(xData.first(),xData.last())));
-        ui->doubleSpinBox->setValue(ui->label_dv->text().toDouble());
+        ui->doubleSpinBox->setValue(dvtime);
         ui->label_sampels->setText(QString::number(xData.size()-1));
-        ui->label_dv->setText(QString::number(xData[yData.indexOf(maxValue)]));
+        ui->label_dv->setText(QString::number(dvtime));
         QtCharts::QLineSeries *linepd = new QtCharts::QLineSeries();
 
         // Add two points to the series with the same x-coordinate and different y-coordinates
         linepd->append(10, maxValue);
         linepd->append(10, minValue);
 
-        linedv->append(ui->label_dv->text().toDouble(), maxValue);
-        linedv->append(ui->label_dv->text().toDouble(), minValue);
+        linedv->append(dvtime, maxValue);
+        linedv->append(dvtime, minValue);
 
         QPen Pen4(QColor("orange"));
         Pen4.setWidth(1);
@@ -479,6 +484,7 @@ void MainWindow::setCapteurData(QString txt, int c)
         linedv->attachAxis(xAxis);
         linedv->attachAxis(yAxis);
         chart1->update();
+        c1Isvalide = true;
     }else if(c == 2){
         QStringList list = txt.split("\n");
         for(int i = 0;i<list.length();i++){
@@ -488,7 +494,9 @@ void MainWindow::setCapteurData(QString txt, int c)
             xData2.append(fields[0].toDouble());
             yData2.append(fields[1].toDouble());
         }
-        clearChart(chart2);
+//        clearChart(chart2);
+        chart2 = new QtCharts::QChart();
+        chartView1->setChart(chart2);
         ui->tableWidget_2->setRowCount(yData2.size());
         ui->tableWidget_2->setColumnCount(2);
         ui->tableWidget_2->setHorizontalHeaderLabels({"temps", "Magnitude"});
@@ -524,20 +532,23 @@ void MainWindow::setCapteurData(QString txt, int c)
 
         minValue2 = *minIt;
         maxValue2 = *maxIt;
+        double dvtime = xData[yData.indexOf(maxValue)];
+
+
         ui->label_max_2->setText(QString::number(maxValue2));
         ui->label_min_2->setText(QString::number(minValue2));
         ui->label_temp_2->setText(QString::number(qMax(xData2.first(),xData2.last())));
-        ui->doubleSpinBox_2->setValue(ui->label_dv_2->text().toDouble());
+        ui->doubleSpinBox_2->setValue(dvtime);
         ui->label_sampels_2->setText(QString::number(xData2.size()-1));
-        ui->label_dv_2->setText(QString::number(xData2[yData2.indexOf(maxValue2)]));
+        ui->label_dv_2->setText(QString::number(dvtime));
         QtCharts::QLineSeries *linepd = new QtCharts::QLineSeries();
 
         // Add two points to the series with the same x-coordinate and different y-coordinates
         linepd->append(10, maxValue2);
         linepd->append(10, minValue2);
 
-        linedv2->append(ui->label_dv_2->text().toDouble(), maxValue2);
-        linedv2->append(ui->label_dv_2->text().toDouble(), minValue2);
+        linedv2->append(dvtime, maxValue2);
+        linedv2->append(dvtime, minValue2);
 
         QPen Pen4(QColor("orange"));
         Pen4.setWidth(1);
@@ -556,6 +567,7 @@ void MainWindow::setCapteurData(QString txt, int c)
         linedv2->attachAxis(xAxis);
         linedv2->attachAxis(yAxis);
         chart2->update();
+        c2Isvalide = true;
     }else{
         QStringList list = txt.split("\n");
         for(int i = 0;i<list.length();i++){
@@ -565,7 +577,9 @@ void MainWindow::setCapteurData(QString txt, int c)
             xData3.append(fields[0].toDouble());
             yData3.append(fields[1].toDouble());
         }
-        clearChart(chart3);
+//        clearChart(chart3);
+        chart3 = new QtCharts::QChart();
+        chartView2->setChart(chart3);
         ui->tableWidget_3->setRowCount(yData3.size());
         ui->tableWidget_3->setColumnCount(2);
         ui->tableWidget_3->setHorizontalHeaderLabels({"temps", "Magnitude"});
@@ -634,6 +648,7 @@ void MainWindow::setCapteurData(QString txt, int c)
         linedv3->attachAxis(xAxis);
         linedv3->attachAxis(yAxis);
         chart3->update();
+        c3Isvalide = true;
     }
 }
 
@@ -691,23 +706,71 @@ QString MainWindow::convertTableToString(const QTableWidget *tableWidget)
     return result;
 }
 
-void MainWindow::clearChart(QtCharts::QChart *chart)
+void MainWindow::clearwindo()
 {
-    // Clearing series
-    while (!chart->series().isEmpty()) {
-        QtCharts::QAbstractSeries *series = chart->series().at(0);
-        chart->removeSeries(series);
-        series->deleteLater();
-    }
+    chart1 = new QtCharts::QChart();
+    chartView->setChart(chart1);
+    chart2 = new QtCharts::QChart();
+    chartView1->setChart(chart2);
+    chart3 = new QtCharts::QChart();
+    chartView2->setChart(chart3);
+    xData.clear();
+    yData.clear();
+    xData2.clear();
+    yData2.clear();
+    xData3.clear();
+    xData3.clear();
+    ui->tableWidget->clear();
+    ui->tableWidget_2->clear();
+    ui->tableWidget_3->clear();
+    ui->radioButtonConfg1->setChecked(false);
+    ui->radioButtonConfg2->setChecked(true);
 
-    // Clearing axes
-    while (!chart->axes().isEmpty()) {
-        QtCharts::QAbstractAxis *axis = chart->axes().at(0);
-        chart->removeAxis(axis);
-        axis->deleteLater();
-    }
+    m_width = 1;
+    ui->doubleSpinBox_larg->setValue(0);
+    m_height = 1;
+    ui->doubleSpinBox_haut->setValue(0);
+    ui->doubleSpinBox_10->setValue(0);
+    ui->doubleSpinBox_cx1->setValue(00);
+    ui->doubleSpinBox_cy1->setValue(00);
+    ui->doubleSpinBox_cx2->setValue(00);
+    ui->doubleSpinBox_cy2->setValue(00);
+    ui->doubleSpinBox_cx3->setValue(00);
+    ui->doubleSpinBox_cy3->setValue(00);
+    ui->materiauxAcier->setCurrentIndex(0);
+    ui->materiauxHuile->setCurrentIndex(0);
+    ui->materiauxMatr1->setCurrentIndex(0);
+    ui->label_max->setText("00");
+    ui->label_min->setText("00");
+    ui->label_temp->setText("00");
+    ui->doubleSpinBox->setValue(00);
+    ui->label_sampels->setText("00");
+    ui->label_dv->setText("00");
+
+    ui->label_max_2->setText("00");
+    ui->label_min_2->setText("00");
+    ui->label_temp_2->setText("00");
+    ui->doubleSpinBox_2->setValue(00);
+    ui->label_sampels_2->setText("00");
+    ui->label_dv_2->setText("00");
+
+    ui->label_max_3->setText("00");
+    ui->label_min_3->setText("00");
+    ui->label_temp_3->setText("00");
+    ui->doubleSpinBox_3->setValue(00);
+    ui->label_sampels_3->setText("00");
+    ui->label_dv_3->setText("00");
+
+    m_scene->removeItem(m_square);
+    m_scene->removeItem(capteur1);
+    m_scene->removeItem(capteur2);
+    m_scene->removeItem(capteur3);
+    m_square = new QGraphicsRectItem(0, 0, 0, 0);
+    capteur1 = new QGraphicsRectItem(0, 0, 0, 0);
+    capteur2 = new QGraphicsRectItem(0, 0, 0, 0);
+    capteur3 = new QGraphicsRectItem(0, 0, 0, 0);
+
 }
-
 
 double MainWindow::calculateDistance(const QPointF& point1, const QPointF& point2) {
     double deltaX = point2.x() - point1.x();
@@ -732,18 +795,14 @@ void MainWindow::on_doubleSpinBox_cx1_valueChanged(double arg1)
     if(arg1 == 0 || arg1 == m_width || ui->doubleSpinBox_cy1->value() == m_height || ui->doubleSpinBox_cy1->value() == 0){
         ui->doubleSpinBox_cx1->setStyleSheet("color:black;");
         ui->doubleSpinBox_cy1->setStyleSheet("color:black;");
-        c1Isvalide = true;
         addCapteur(arg1,ui->doubleSpinBox_cy1->value(),1);
 
     }else{
         ui->doubleSpinBox_cx1->setStyleSheet("color:red;");
         ui->doubleSpinBox_cy1->setStyleSheet("color:red;");
-        c1Isvalide = false;
     }
-    updateApply();
-    ui->label_capteur1_c->setText(ui->label_capteur1_c->text().replace('x',
-                                 QString::number(ui->doubleSpinBox_cx1->value())).replace('y',
-                                 QString::number(ui->doubleSpinBox_cy1->value())));
+    ui->label_capteur1_c->setText("("+QString::number(ui->doubleSpinBox_cx1->value()) +","+
+                                  QString::number(ui->doubleSpinBox_cy1->value()) + ")");
     ui->label_Rcapteur1_c->setText(ui->label_capteur1_c->text());
 }
 
@@ -753,17 +812,13 @@ void MainWindow::on_doubleSpinBox_cy1_valueChanged(double arg1)
     if(arg1 == 0 || arg1 == m_height || ui->doubleSpinBox_cx1->value() == m_width || ui->doubleSpinBox_cx1->value() == 0){
         ui->doubleSpinBox_cx1->setStyleSheet("color:black;");
         ui->doubleSpinBox_cy1->setStyleSheet("color:black;");
-        c1Isvalide = true;
         addCapteur(ui->doubleSpinBox_cx1->value(),arg1,1);
     }else{
         ui->doubleSpinBox_cx1->setStyleSheet("color:red;");
         ui->doubleSpinBox_cy1->setStyleSheet("color:red;");
-        c1Isvalide = false;
     }
-    updateApply();
-    ui->label_capteur1_c->setText(ui->label_capteur1_c->text().replace('x',
-                                  QString::number(ui->doubleSpinBox_cx1->value())).replace('y',
-                                  QString::number(ui->doubleSpinBox_cy1->value())));
+    ui->label_capteur1_c->setText("("+QString::number(ui->doubleSpinBox_cx1->value()) +","+
+                                  QString::number(ui->doubleSpinBox_cy1->value()) + ")");
     ui->label_Rcapteur1_c->setText(ui->label_capteur1_c->text());
 
 }
@@ -774,19 +829,15 @@ void MainWindow::on_doubleSpinBox_cx2_valueChanged(double arg1)
     if(arg1 == 0 || arg1 == m_width || ui->doubleSpinBox_cy2->value() == m_height || ui->doubleSpinBox_cy2->value() == 0){
         ui->doubleSpinBox_cx2->setStyleSheet("color:black;");
         ui->doubleSpinBox_cy2->setStyleSheet("color:black;");
-        c2Isvalide = true;
         addCapteur(arg1,ui->doubleSpinBox_cy2->value(),2);
     }else{
         ui->doubleSpinBox_cx2->setStyleSheet("color:red;");
         ui->doubleSpinBox_cy2->setStyleSheet("color:red;");
-        c2Isvalide = false;
     }
-    updateApply();
-    ui->label_capteur1_c_2->setText(ui->label_capteur1_c_2->text().replace('x',
-                                    QString::number(ui->doubleSpinBox_cx2->value())).replace('y',
-                                    QString::number(ui->doubleSpinBox_cy2->value())));
-    ui->label_Rcapteur2_c->setText(ui->label_capteur1_c_2->text());
+    ui->label_capteur1_c_2->setText("("+QString::number(ui->doubleSpinBox_cx2->value()) +","+
+                                  QString::number(ui->doubleSpinBox_cy2->value()) + ")");
 
+    ui->label_Rcapteur2_c->setText(ui->label_capteur1_c_2->text());
 }
 
 
@@ -795,17 +846,13 @@ void MainWindow::on_doubleSpinBox_cy2_valueChanged(double arg1)
     if(arg1 == 0 || arg1 == m_height || ui->doubleSpinBox_cx2->value() == m_width || ui->doubleSpinBox_cx2->value() == 0){
         ui->doubleSpinBox_cx2->setStyleSheet("color:black;");
         ui->doubleSpinBox_cy2->setStyleSheet("color:black;");
-        c2Isvalide = true;
         addCapteur(ui->doubleSpinBox_cx2->value(),ui->doubleSpinBox_cy2->value(),2);
     }else{
         ui->doubleSpinBox_cx2->setStyleSheet("color:red;");
         ui->doubleSpinBox_cy2->setStyleSheet("color:red;");
-        c2Isvalide = false;
     }
-    updateApply();
-    ui->label_capteur1_c_2->setText(ui->label_capteur1_c_2->text().replace('x',
-                                    QString::number(ui->doubleSpinBox_cx2->value())).replace('y',
-                                    QString::number(ui->doubleSpinBox_cy2->value())));
+    ui->label_capteur1_c_2->setText("("+QString::number(ui->doubleSpinBox_cx2->value()) +","+
+                                  QString::number(ui->doubleSpinBox_cy2->value()) + ")");
     ui->label_Rcapteur2_c->setText(ui->label_capteur1_c_2->text());
 }
 
@@ -815,17 +862,13 @@ void MainWindow::on_doubleSpinBox_cx3_valueChanged(double arg1)
     if(arg1 == 0 || arg1 == m_width || ui->doubleSpinBox_cy3->value() == m_height || ui->doubleSpinBox_cy3->value() == 0){
         ui->doubleSpinBox_cx3->setStyleSheet("color:black;");
         ui->doubleSpinBox_cy3->setStyleSheet("color:black;");
-        c3Isvalide = true;
         addCapteur(ui->doubleSpinBox_cx3->value(),ui->doubleSpinBox_cy3->value(),3);
     }else{
         ui->doubleSpinBox_cx3->setStyleSheet("color:red;");
         ui->doubleSpinBox_cy3->setStyleSheet("color:red;");
-        c3Isvalide = false;
     }
-    updateApply();
-    ui->label_capteur1_c_3->setText(ui->label_capteur1_c_3->text().replace('x',
-                                    QString::number(ui->doubleSpinBox_cx3->value())).replace('y',
-                                    QString::number(ui->doubleSpinBox_cy3->value())));
+    ui->label_capteur1_c_3->setText("("+QString::number(ui->doubleSpinBox_cx3->value()) +","+
+                                  QString::number(ui->doubleSpinBox_cy3->value()) + ")");
     ui->label_Rcapteur3_c->setText(ui->label_capteur1_c_3->text());
 
 }
@@ -836,17 +879,13 @@ void MainWindow::on_doubleSpinBox_cy3_valueChanged(double arg1)
     if(arg1 == 0 || arg1 == m_height || ui->doubleSpinBox_cx3->value() == m_width || ui->doubleSpinBox_cx3->value() == 0){
         ui->doubleSpinBox_cx3->setStyleSheet("color:black;");
         ui->doubleSpinBox_cy3->setStyleSheet("color:black;");
-        c3Isvalide = true;
         addCapteur(ui->doubleSpinBox_cx3->value(),arg1,3);
     }else{
         ui->doubleSpinBox_cx3->setStyleSheet("color:red;");
         ui->doubleSpinBox_cy3->setStyleSheet("color:red;");
-        c3Isvalide = false;
     }
-    updateApply();
-    ui->label_capteur1_c_3->setText(ui->label_capteur1_c_3->text().replace('x',
-                                    QString::number(ui->doubleSpinBox_cx3->value())).replace('y',
-                                    QString::number(ui->doubleSpinBox_cy3->value())));
+    ui->label_capteur1_c_3->setText("("+QString::number(ui->doubleSpinBox_cx3->value()) +","+
+                                  QString::number(ui->doubleSpinBox_cy3->value()) + ")");
     ui->label_Rcapteur3_c->setText(ui->label_capteur1_c_3->text());
 }
 
@@ -859,15 +898,10 @@ void MainWindow::on_epaisseur_valueChanged(double arg1)
     m_scene->update();
 }
 
-void MainWindow::updateApply()
+void MainWindow::updateResultat()
 {
-    if(c3Isvalide && c2Isvalide && c1Isvalide){
-        ui->pushButton_apply->setEnabled(true);
-    }else{
-        ui->pushButton_apply->setEnabled(false);
-    }
-}
 
+}
 
 void MainWindow::on_doubleSpinBox_larg_valueChanged(double arg1)
 {
@@ -877,12 +911,10 @@ void MainWindow::on_doubleSpinBox_larg_valueChanged(double arg1)
 
 
     creatSquare(int(ui->doubleSpinBox_larg->value()),int(ui->doubleSpinBox_haut->value()));
-    if(arg1<=0){
+    if(arg1<0){
         ui->doubleSpinBox_larg->setStyleSheet("color : red;");
-        ui->pushButton_apply->setEnabled(false);
     }else{
         ui->doubleSpinBox_larg->setStyleSheet("color : black;");
-        ui->pushButton_apply->setEnabled(true);
     }
     ui->label_modelSize->setText("("+ui->doubleSpinBox_larg->text()+","+ui->doubleSpinBox_haut->text()+")");
 }
@@ -894,12 +926,10 @@ void MainWindow::on_doubleSpinBox_haut_valueChanged(double arg1)
     ui->doubleSpinBox_cy2->setMaximum(arg1);
     ui->doubleSpinBox_cy3->setMaximum(arg1);
     creatSquare(int(ui->doubleSpinBox_larg->value()),int(ui->doubleSpinBox_haut->value()));
-    if(arg1<=0){
+    if(arg1<0){
         ui->doubleSpinBox_haut->setStyleSheet("color : red;");
-        ui->pushButton_apply->setEnabled(false);
     }else{
         ui->doubleSpinBox_haut->setStyleSheet("color : black;");
-        ui->pushButton_apply->setEnabled(true);
     }
     ui->label_modelSize->setText("("+ui->doubleSpinBox_larg->text()+","+ui->doubleSpinBox_haut->text()+")");
 }
@@ -1087,12 +1117,6 @@ void MainWindow::on_materiauxMatr1_currentTextChanged(const QString &arg1)
 }
 
 
-void MainWindow::on_pushButton_apply_clicked()
-{
-    creatSquare(int(ui->doubleSpinBox_larg->value()),int(ui->doubleSpinBox_haut->value()));
-}
-
-
 void MainWindow::on_pushButton_4_clicked()
 {
     QString fileName = QFileDialog::getOpenFileName(nullptr, "Open File", "", "Text Files (*.txt)");
@@ -1182,6 +1206,7 @@ void MainWindow::on_pushButton_4_clicked()
     linedv->attachAxis(xAxis);
     linedv->attachAxis(yAxis);
     chart1->update();
+    c1Isvalide = true;
 }
 
 
@@ -1320,7 +1345,7 @@ void MainWindow::on_pushButton_6_clicked()
     linedv2->attachAxis(xAxis);
     linedv2->attachAxis(yAxis);
     chart2->update();
-
+    c2Isvalide = true;
 }
 
 
@@ -1412,7 +1437,7 @@ void MainWindow::on_pushButton_8_clicked()
     linedv3->attachAxis(xAxis);
     linedv3->attachAxis(yAxis);
     chart3->update();
-
+    c3Isvalide = true;
 }
 
 
@@ -1579,5 +1604,32 @@ void MainWindow::on_doubleSpinBox_X_valueChanged(double arg1)
 void MainWindow::on_doubleSpinBox_Y_valueChanged(double arg1)
 {
     calculateError();
+}
+
+
+void MainWindow::on_actionNouvelle_triggered()
+{
+    clearwindo();
+}
+
+
+void MainWindow::on_actionabout_triggered()
+{
+    about *ab = new about();
+    ab->setWindowModality(Qt::WindowModal);
+    ab->show();
+}
+
+
+void MainWindow::on_actiongitHub_triggered()
+{
+    QDesktopServices::openUrl(QUrl("https://github.com/saberhammouche/Partial-Discharge-Source-Locator"));
+}
+
+
+void MainWindow::on_actionconntact_triggered()
+{
+    QString email = "mailto: saberhammoche34@gmail.com";
+    QDesktopServices::openUrl(QUrl(email));
 }
 

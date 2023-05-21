@@ -71,7 +71,7 @@
        <item>
         <widget class="QPushButton" name="pushButton_3">
          <property name="text">
-          <string>Resultat</string>
+          <string>Résultat</string>
          </property>
         </widget>
        </item>
@@ -3483,33 +3483,6 @@
            </spacer>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_23">
-            <property name="topMargin">
-             <number>0</number>
-            </property>
-            <item>
-             <spacer name="horizontalSpacer_4">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item>
-             <widget class="QPushButton" name="pushButton_apply">
-              <property name="text">
-               <string>Appliquer</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
            <spacer name="verticalSpacer_3">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
@@ -3556,9 +3529,10 @@
     <property name="title">
      <string>Fichier</string>
     </property>
+    <addaction name="actionNouvelle"/>
+    <addaction name="separator"/>
     <addaction name="actionSave"/>
     <addaction name="actionouvrir"/>
-    <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menu_propos">
     <property name="title">
@@ -3598,6 +3572,11 @@
   <action name="actionconntact">
    <property name="text">
     <string>contact</string>
+   </property>
+  </action>
+  <action name="actionNouvelle">
+   <property name="text">
+    <string>Nouvelle</string>
    </property>
   </action>
  </widget>

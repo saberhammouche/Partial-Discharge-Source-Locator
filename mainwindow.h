@@ -18,6 +18,7 @@
 #include <QGenericMatrix>
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QDesktopServices>
 #include "filesform.h"
 #include "qtablewidget.h"
 
@@ -45,7 +46,7 @@ public:
     void setCapteurData(QString txt,int c);
     void setFiles();
     QString convertTableToString(const QTableWidget *tableWidget);
-    void clearChart(QtCharts::QChart *chart);
+    void clearwindo();
     double calculateDistance(const QPointF& point1, const QPointF& point2);
 
 
@@ -59,7 +60,7 @@ private slots:
     void on_doubleSpinBox_cx3_valueChanged(double arg1);
     void on_doubleSpinBox_cy3_valueChanged(double arg1);
     void on_epaisseur_valueChanged(double arg1);
-    void updateApply();
+    void updateResultat();
     void on_doubleSpinBox_larg_valueChanged(double arg1);
     void on_doubleSpinBox_haut_valueChanged(double arg1);
     void addCapteur(int x, int y, int capNum);
@@ -75,7 +76,6 @@ private slots:
     void on_materiauxAcier_currentTextChanged(const QString &arg1);
     void on_materiauxHuile_currentTextChanged(const QString &arg1);
     void on_materiauxMatr1_currentTextChanged(const QString &arg1);
-    void on_pushButton_apply_clicked();
     void on_pushButton_4_clicked();
     void on_pushButton_clicked();
     void on_pushButton_2_clicked();
@@ -96,10 +96,16 @@ private slots:
     void on_checkBox_stateChanged(int arg1);
     void on_checkBox_2_stateChanged(int arg1);
     void showResultat();
-
     void on_doubleSpinBox_X_valueChanged(double arg1);
-
     void on_doubleSpinBox_Y_valueChanged(double arg1);
+
+    void on_actionNouvelle_triggered();
+
+    void on_actionabout_triggered();
+
+    void on_actiongitHub_triggered();
+
+    void on_actionconntact_triggered();
 
 private:
     Ui::MainWindow *ui;

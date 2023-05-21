@@ -23,6 +23,9 @@ set(PROJECT_SOURCES
         filesform.h 
         filesform.cpp
         filesform.ui
+        about.h
+        about.cpp
+        about.ui
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
