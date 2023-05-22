@@ -19,6 +19,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::setup()
 {
+    setWindowTitle("Localisateur de Sources de Décharges Partielles");
     ui->epaisseur->setEnabled(false);
     m_square = new QGraphicsRectItem(0, 0, 0, 0);
     capteur1 = new QGraphicsRectItem(0, 0, 0, 0);
@@ -75,7 +76,11 @@ void MainWindow::setup()
     ui->lineEdit_r1->setReadOnly(true);
     ui->lineEdit_r2->setReadOnly(true);
     ui->lineEdit_r3->setReadOnly(true);
+    ui->lineEdit_pos1->setReadOnly(true);
+    ui->lineEdit_pos2->setReadOnly(true);
+    ui->lineEdit_pos3->setReadOnly(true);
     ui->verticalLayout_11->setProperty("isSpacer", true);
+    updateResultat();
 }
 
 void MainWindow::creatSquare(int width, int hight)
@@ -165,14 +170,14 @@ void MainWindow::calculateError()
 void MainWindow::drowCircles()
 {
     double r1 = calculateDistance(QPointF(capteur1->rect().x() + 5,capteur1->rect().y()+5),
-                            QPointF(DPpoint.x()*m_Rsquare->rect().width()/
-                                    m_width,DPpoint.y()*m_Rsquare->rect().height()/m_height));
+                                  QPointF(DPpoint.x()*m_Rsquare->rect().width()/
+                                          m_width,DPpoint.y()*m_Rsquare->rect().height()/m_height));
     double r2 = calculateDistance(QPointF(capteur2->rect().x() + 5,capteur2->rect().y()+5)
-                           , QPointF(DPpoint.x()*m_Rsquare->rect().width()/
-                                     m_width,DPpoint.y()*m_Rsquare->rect().height()/m_height));
+                                  , QPointF(DPpoint.x()*m_Rsquare->rect().width()/
+                                            m_width,DPpoint.y()*m_Rsquare->rect().height()/m_height));
     double r3 = calculateDistance(QPointF(capteur3->rect().x() + 5,capteur3->rect().y()+5)
-                           , QPointF(DPpoint.x()*m_Rsquare->rect().width()/
-                                     m_width,DPpoint.y()*m_Rsquare->rect().height()/m_height));
+                                  , QPointF(DPpoint.x()*m_Rsquare->rect().width()/
+                                            m_width,DPpoint.y()*m_Rsquare->rect().height()/m_height));
     ui->lineEdit_r1->setText(QString::number(r1,'f',2));
     ui->lineEdit_r2->setText(QString::number(r2,'f',2));
     ui->lineEdit_r3->setText(QString::number(r3,'f',2));
@@ -226,6 +231,7 @@ void MainWindow::save()
             return;
         }
     }
+    ui->statusbar->showMessage(fileName);
     settings.beginGroup(fileName);
 
     // Property Data
@@ -329,6 +335,7 @@ void MainWindow::open(QString filename)
     ui->tableWidget->clear();
     ui->tableWidget_2->clear();
     ui->tableWidget_3->clear();
+    ui->statusbar->showMessage(filename);
 
     settings.beginGroup(filename);
 
@@ -494,7 +501,7 @@ void MainWindow::setCapteurData(QString txt, int c)
             xData2.append(fields[0].toDouble());
             yData2.append(fields[1].toDouble());
         }
-//        clearChart(chart2);
+        //        clearChart(chart2);
         chart2 = new QtCharts::QChart();
         chartView1->setChart(chart2);
         ui->tableWidget_2->setRowCount(yData2.size());
@@ -577,7 +584,7 @@ void MainWindow::setCapteurData(QString txt, int c)
             xData3.append(fields[0].toDouble());
             yData3.append(fields[1].toDouble());
         }
-//        clearChart(chart3);
+        //        clearChart(chart3);
         chart3 = new QtCharts::QChart();
         chartView2->setChart(chart3);
         ui->tableWidget_3->setRowCount(yData3.size());
@@ -650,6 +657,7 @@ void MainWindow::setCapteurData(QString txt, int c)
         chart3->update();
         c3Isvalide = true;
     }
+    updateResultat();
 }
 
 void MainWindow::setFiles()
@@ -708,6 +716,7 @@ QString MainWindow::convertTableToString(const QTableWidget *tableWidget)
 
 void MainWindow::clearwindo()
 {
+    on_pushButton_clicked();
     chart1 = new QtCharts::QChart();
     chartView->setChart(chart1);
     chart2 = new QtCharts::QChart();
@@ -769,13 +778,66 @@ void MainWindow::clearwindo()
     capteur1 = new QGraphicsRectItem(0, 0, 0, 0);
     capteur2 = new QGraphicsRectItem(0, 0, 0, 0);
     capteur3 = new QGraphicsRectItem(0, 0, 0, 0);
-
+    c1Isvalide = false;
+    c2Isvalide = false;
+    c3Isvalide = false;
+    updateResultat();
 }
 
 double MainWindow::calculateDistance(const QPointF& point1, const QPointF& point2) {
     double deltaX = point2.x() - point1.x();
     double deltaY = point2.y() - point1.y();
     return std::sqrt(deltaX * deltaX + deltaY * deltaY);
+}
+
+
+QVector<QPointF> MainWindow::findCircleRectangleIntersection(QPointF circleCenter, qreal circleRadius, QRectF square) {
+
+    // Create an empty QVector to store the intersection points
+    QVector<QPointF> intersections;
+
+    // Find the distance between centers
+    qreal circleDistanceX = qAbs(circleCenter.x() - square.center().x());
+    qreal circleDistanceY = qAbs(circleCenter.y() - square.center().y());
+
+    // Check if they are too far apart or too close together
+    if (circleDistanceX > (square.width() / 2 + circleRadius)) return intersections;
+    if (circleDistanceY > (square.height() / 2 + circleRadius)) return intersections;
+    if (circleDistanceX <= (square.width() / 2))
+    {
+        // Add two intersection points on the vertical sides of the square
+        intersections.append(QPointF(square.left(), circleCenter.y()));
+        intersections.append(QPointF(square.right(), circleCenter.y()));
+    }
+    if (circleDistanceY <= (square.height() / 2))
+    {
+        // Add two intersection points on the horizontal sides of the square
+        intersections.append(QPointF(circleCenter.x(), square.top()));
+        intersections.append(QPointF(circleCenter.x(), square.bottom()));
+    }
+
+    // Check if they intersect at a corner
+    qreal cornerDistanceSq = pow(circleDistanceX - square.width() / 2, 2) +
+            pow(circleDistanceY - square.height() / 2, 2);
+    if (cornerDistanceSq <= pow(circleRadius, 2))
+    {
+        // Find the closest corner of the square to the center of the circle
+        QPointF closestCorner = square.center() + QPointF(
+                    (circleCenter.x() < square.center().x()) ? -square.width() / 2 : square.width() / 2,
+                    (circleCenter.y() < square.center().y()) ? -square.height() / 2 : square.height() / 2);
+
+        // Find the intersection point at that corner using Pythagoras' theorem
+        qreal x = sqrt(pow(circleRadius, 2) - pow(closestCorner.y() - circleCenter.y(), 2)) +
+                circleCenter.x();
+        qreal y = sqrt(pow(circleRadius, 2) - pow(closestCorner.x() - circleCenter.x(), 2)) +
+                circleCenter.y();
+
+        // Add the intersection point to the QVector
+        intersections.append(QPointF(x, y));
+    }
+
+    // Return the QVector of intersection points
+    return intersections;
 }
 
 void MainWindow::on_radioButtonConfg1_clicked()
@@ -835,7 +897,7 @@ void MainWindow::on_doubleSpinBox_cx2_valueChanged(double arg1)
         ui->doubleSpinBox_cy2->setStyleSheet("color:red;");
     }
     ui->label_capteur1_c_2->setText("("+QString::number(ui->doubleSpinBox_cx2->value()) +","+
-                                  QString::number(ui->doubleSpinBox_cy2->value()) + ")");
+                                    QString::number(ui->doubleSpinBox_cy2->value()) + ")");
 
     ui->label_Rcapteur2_c->setText(ui->label_capteur1_c_2->text());
 }
@@ -852,7 +914,7 @@ void MainWindow::on_doubleSpinBox_cy2_valueChanged(double arg1)
         ui->doubleSpinBox_cy2->setStyleSheet("color:red;");
     }
     ui->label_capteur1_c_2->setText("("+QString::number(ui->doubleSpinBox_cx2->value()) +","+
-                                  QString::number(ui->doubleSpinBox_cy2->value()) + ")");
+                                    QString::number(ui->doubleSpinBox_cy2->value()) + ")");
     ui->label_Rcapteur2_c->setText(ui->label_capteur1_c_2->text());
 }
 
@@ -868,7 +930,7 @@ void MainWindow::on_doubleSpinBox_cx3_valueChanged(double arg1)
         ui->doubleSpinBox_cy3->setStyleSheet("color:red;");
     }
     ui->label_capteur1_c_3->setText("("+QString::number(ui->doubleSpinBox_cx3->value()) +","+
-                                  QString::number(ui->doubleSpinBox_cy3->value()) + ")");
+                                    QString::number(ui->doubleSpinBox_cy3->value()) + ")");
     ui->label_Rcapteur3_c->setText(ui->label_capteur1_c_3->text());
 
 }
@@ -885,7 +947,7 @@ void MainWindow::on_doubleSpinBox_cy3_valueChanged(double arg1)
         ui->doubleSpinBox_cy3->setStyleSheet("color:red;");
     }
     ui->label_capteur1_c_3->setText("("+QString::number(ui->doubleSpinBox_cx3->value()) +","+
-                                  QString::number(ui->doubleSpinBox_cy3->value()) + ")");
+                                    QString::number(ui->doubleSpinBox_cy3->value()) + ")");
     ui->label_Rcapteur3_c->setText(ui->label_capteur1_c_3->text());
 }
 
@@ -900,7 +962,11 @@ void MainWindow::on_epaisseur_valueChanged(double arg1)
 
 void MainWindow::updateResultat()
 {
-
+    if(c1Isvalide && c2Isvalide && c3Isvalide){
+        ui->pushButton_3->setEnabled(true);
+    }else{
+        ui->pushButton_3->setEnabled(false);
+    }
 }
 
 void MainWindow::on_doubleSpinBox_larg_valueChanged(double arg1)
@@ -1207,6 +1273,7 @@ void MainWindow::on_pushButton_4_clicked()
     linedv->attachAxis(yAxis);
     chart1->update();
     c1Isvalide = true;
+    updateResultat();
 }
 
 
@@ -1243,6 +1310,8 @@ void MainWindow::on_radioButton_2_clicked()
 
 void MainWindow::on_doubleSpinBox_valueChanged(double arg1)
 {
+    if(xData.isEmpty())
+        return;
     linedv->clear();
     linedv->append(arg1, maxValue);
     linedv->append(arg1, minValue);
@@ -1346,6 +1415,8 @@ void MainWindow::on_pushButton_6_clicked()
     linedv2->attachAxis(yAxis);
     chart2->update();
     c2Isvalide = true;
+    updateResultat();
+
 }
 
 
@@ -1438,6 +1509,7 @@ void MainWindow::on_pushButton_8_clicked()
     linedv3->attachAxis(yAxis);
     chart3->update();
     c3Isvalide = true;
+    updateResultat();
 }
 
 
@@ -1467,6 +1539,8 @@ void MainWindow::on_radioButton_man3_clicked()
 
 void MainWindow::on_doubleSpinBox_3_valueChanged(double arg1)
 {
+    if(yData3.isEmpty())
+        return;
     linedv3->clear();
     linedv3->append(arg1, maxValue3);
     linedv3->append(arg1, minValue3);
@@ -1483,6 +1557,8 @@ void MainWindow::on_doubleSpinBox_3_valueChanged(double arg1)
 
 void MainWindow::on_doubleSpinBox_2_valueChanged(double arg1)
 {
+    if(yData2.isEmpty())
+        return;
     linedv2->clear();
     linedv2->append(arg1, maxValue2);
     linedv2->append(arg1, minValue2);
@@ -1571,7 +1647,6 @@ void MainWindow::showResultat()
         m_Rscene->addItem(Rcapteur2);
         m_Rscene->addItem(Rcapteur3);
         m_Rscene->update();
-
         const double* data = calculateDP().constData();
         DPpoint.setX(data[0]);
         DPpoint.setY(data[1]);
@@ -1591,6 +1666,20 @@ void MainWindow::showResultat()
         on_checkBox_2_stateChanged(0);
         QTimer *timer = dynamic_cast<QTimer *>(sender());
         timer->stop();
+        QVector<QPointF> vec = findCircleRectangleIntersection(DPpoint,m_width/2,QRectF(0,0,m_width,m_height));
+        qDebug() << vec;
+        if(vec.isEmpty())
+            return;
+        else if(vec.size()==1)
+            ui->lineEdit_pos1->setText("("+ QString::number(vec[0].x())+","+QString::number(vec[0].y()));
+        else if(vec.size()==2){
+            ui->lineEdit_pos1->setText("("+ QString::number(vec[0].x())+","+QString::number(vec[0].y())+")");
+            ui->lineEdit_pos2->setText("("+ QString::number(vec[1].x())+","+QString::number(vec[1].y())+")");
+        }else if(vec.size()>= 3){
+            ui->lineEdit_pos1->setText("("+ QString::number(vec[0].x())+","+QString::number(vec[0].y())+")");
+            ui->lineEdit_pos2->setText("("+ QString::number(vec[1].x())+","+QString::number(vec[1].y())+")");
+            ui->lineEdit_pos3->setText("("+ QString::number(vec[2].x())+","+QString::number(vec[2].y())+")");
+        }
     }
 }
 
@@ -1631,5 +1720,43 @@ void MainWindow::on_actionconntact_triggered()
 {
     QString email = "mailto: saberhammoche34@gmail.com";
     QDesktopServices::openUrl(QUrl(email));
+}
+
+
+void MainWindow::on_checkBox_usereel_stateChanged(int arg1)
+{
+    if(ui->doubleSpinBox_X->value() == 0 ||ui->doubleSpinBox_Y->value() == 0 ){
+        ui->checkBox_usereel->setChecked(false);
+        return;
+    }
+    if(arg1 == 0){
+        QVector<QPointF> vec = findCircleRectangleIntersection(DPpoint,m_width/2,QRectF(0,0,m_width,m_height));
+        if(vec.isEmpty())
+            return;
+        else if(vec.size()==1)
+            ui->lineEdit_pos1->setText("("+ QString::number(vec[0].x())+","+QString::number(vec[0].y())+")");
+        else if(vec.size()==2){
+            ui->lineEdit_pos1->setText("("+ QString::number(vec[0].x())+","+QString::number(vec[0].y())+")");
+            ui->lineEdit_pos2->setText("("+ QString::number(vec[1].x())+","+QString::number(vec[1].y())+")");
+        }else if(vec.size()>= 3){
+            ui->lineEdit_pos1->setText("("+ QString::number(vec[0].x())+","+QString::number(vec[0].y())+")");
+            ui->lineEdit_pos2->setText("("+ QString::number(vec[1].x())+","+QString::number(vec[1].y())+")");
+            ui->lineEdit_pos3->setText("("+ QString::number(vec[2].x())+","+QString::number(vec[2].y())+")");
+        }
+    }else{
+        QVector<QPointF> vec = findCircleRectangleIntersection(DPpoint,m_width/2,QRectF(0,0,m_width,m_height));
+        if(vec.isEmpty())
+            return;
+        else if(vec.size()==1)
+            ui->lineEdit_pos1->setText("("+ QString::number(vec[0].x())+","+QString::number(vec[0].y())+")");
+        else if(vec.size()==2){
+            ui->lineEdit_pos1->setText("("+ QString::number(vec[0].x())+","+QString::number(vec[0].y())+")");
+            ui->lineEdit_pos2->setText("("+ QString::number(vec[1].x())+","+QString::number(vec[1].y())+")");
+        }else if(vec.size()>= 3){
+            ui->lineEdit_pos1->setText("("+ QString::number(vec[0].x())+","+QString::number(vec[0].y())+")");
+            ui->lineEdit_pos2->setText("("+ QString::number(vec[1].x())+","+QString::number(vec[1].y())+")");
+            ui->lineEdit_pos3->setText("("+ QString::number(vec[2].x())+","+QString::number(vec[2].y())+")");
+        }
+    }
 }
 

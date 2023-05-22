@@ -48,6 +48,8 @@ public:
     QString convertTableToString(const QTableWidget *tableWidget);
     void clearwindo();
     double calculateDistance(const QPointF& point1, const QPointF& point2);
+    QVector<QPointF> findCircleRectangleIntersection(QPointF circleCenter, qreal circleRadius, QRectF square);
+
 
 
 private slots:
@@ -106,6 +108,8 @@ private slots:
     void on_actiongitHub_triggered();
 
     void on_actionconntact_triggered();
+
+    void on_checkBox_usereel_stateChanged(int arg1);
 
 private:
     Ui::MainWindow *ui;
