@@ -733,6 +733,23 @@
            </widget>
           </item>
           <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_76">
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="label_98">
+              <property name="text">
+               <string>Seed :</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QDoubleSpinBox" name="doubleSpinBox_Seed"/>
+            </item>
+           </layout>
+          </item>
+          <item>
            <layout class="QHBoxLayout" name="horizontalLayout_23">
             <property name="topMargin">
              <number>0</number>
@@ -821,6 +838,15 @@
              </widget>
             </item>
            </layout>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="checkBox_3">
+            <property name="text">
+             <string>afficher les position 
+(l'intersection entre le cercle et le 
+rectangle)</string>
+            </property>
+           </widget>
           </item>
           <item>
            <spacer name="verticalSpacer_10">
@@ -929,7 +955,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>459</width>
+            <width>502</width>
             <height>785</height>
            </rect>
           </property>
@@ -1059,28 +1085,28 @@
                     </size>
                    </property>
                    <property name="text">
-                    <string>get the data :</string>
+                    <string>obtenir les données à partir de</string>
                    </property>
                   </widget>
                  </item>
                  <item>
                   <widget class="QPushButton" name="pushButton_4">
                    <property name="text">
-                    <string>From file</string>
+                    <string>fichier txt</string>
                    </property>
                   </widget>
                  </item>
                  <item>
                   <widget class="QPushButton" name="pushButton_5">
                    <property name="text">
-                    <string>From excel</string>
+                    <string>fichier excel</string>
                    </property>
                   </widget>
                  </item>
                  <item>
                   <widget class="QPushButton" name="pushButton_10">
                    <property name="text">
-                    <string>From data colucteur</string>
+                    <string>collecteur de données</string>
                    </property>
                   </widget>
                  </item>
@@ -1205,7 +1231,7 @@
                    <item>
                     <widget class="QLabel" name="label_38">
                      <property name="text">
-                      <string>s</string>
+                      <string>µs</string>
                      </property>
                     </widget>
                    </item>
@@ -1301,7 +1327,7 @@
                    <item>
                     <widget class="QLabel" name="label_44">
                      <property name="text">
-                      <string>s</string>
+                      <string>µs</string>
                      </property>
                     </widget>
                    </item>
@@ -1400,7 +1426,7 @@
                    <item>
                     <widget class="QLabel" name="label_47">
                      <property name="text">
-                      <string>s</string>
+                      <string>µs</string>
                      </property>
                     </widget>
                    </item>
@@ -1421,7 +1447,7 @@
                    <item row="0" column="2">
                     <widget class="QLabel" name="label_49">
                      <property name="text">
-                      <string>s</string>
+                      <string>µs</string>
                      </property>
                     </widget>
                    </item>
@@ -1688,28 +1714,28 @@
                     </size>
                    </property>
                    <property name="text">
-                    <string>get the data :</string>
+                    <string>obtenir les données à partir de</string>
                    </property>
                   </widget>
                  </item>
                  <item>
                   <widget class="QPushButton" name="pushButton_6">
                    <property name="text">
-                    <string>From file</string>
+                    <string>fichier txt</string>
                    </property>
                   </widget>
                  </item>
                  <item>
                   <widget class="QPushButton" name="pushButton_7">
                    <property name="text">
-                    <string>From excel</string>
+                    <string>fichier excel</string>
                    </property>
                   </widget>
                  </item>
                  <item>
                   <widget class="QPushButton" name="pushButton_11">
                    <property name="text">
-                    <string>From data colucteur</string>
+                    <string>collecteur de données</string>
                    </property>
                   </widget>
                  </item>
@@ -1834,7 +1860,7 @@
                    <item>
                     <widget class="QLabel" name="label_46">
                      <property name="text">
-                      <string>s</string>
+                      <string>µs</string>
                      </property>
                     </widget>
                    </item>
@@ -2029,7 +2055,7 @@
                    <item>
                     <widget class="QLabel" name="label_55">
                      <property name="text">
-                      <string>s</string>
+                      <string>µs</string>
                      </property>
                     </widget>
                    </item>
@@ -2050,7 +2076,7 @@
                    <item row="0" column="2">
                     <widget class="QLabel" name="label_56">
                      <property name="text">
-                      <string>s</string>
+                      <string>µs</string>
                      </property>
                     </widget>
                    </item>
@@ -2313,28 +2339,28 @@
                     </size>
                    </property>
                    <property name="text">
-                    <string>get the data :</string>
+                    <string>obtenir les données à partir de</string>
                    </property>
                   </widget>
                  </item>
                  <item>
                   <widget class="QPushButton" name="pushButton_8">
                    <property name="text">
-                    <string>From file</string>
+                    <string>fichier txt</string>
                    </property>
                   </widget>
                  </item>
                  <item>
                   <widget class="QPushButton" name="pushButton_9">
                    <property name="text">
-                    <string>From excel</string>
+                    <string>fichier excel</string>
                    </property>
                   </widget>
                  </item>
                  <item>
                   <widget class="QPushButton" name="pushButton_12">
                    <property name="text">
-                    <string>From data colucteur</string>
+                    <string>collecteur de données</string>
                    </property>
                   </widget>
                  </item>
@@ -2675,7 +2701,7 @@
                    <item row="0" column="2">
                     <widget class="QLabel" name="label_70">
                      <property name="text">
-                      <string>s</string>
+                      <string>µs</string>
                      </property>
                     </widget>
                    </item>
@@ -3694,6 +3720,9 @@
   <action name="actionNouvelle">
    <property name="text">
     <string>Nouvelle</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
    </property>
   </action>
  </widget>

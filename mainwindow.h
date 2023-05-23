@@ -49,8 +49,8 @@ public:
     void clearwindo();
     double calculateDistance(const QPointF& point1, const QPointF& point2);
     QVector<QPointF> findCircleRectangleIntersection(QPointF circleCenter, qreal circleRadius, QRectF square);
-
-
+    double round_up(double value, int decimal_places) ;
+    QPair<double,double> solve_quadratic(double a, double b, double c);
 
 private slots:
     void on_radioButtonConfg1_clicked();
@@ -111,6 +111,10 @@ private slots:
 
     void on_checkBox_usereel_stateChanged(int arg1);
 
+    void on_doubleSpinBox_Seed_valueChanged(double arg1);
+
+    void on_checkBox_3_stateChanged(int arg1);
+
 private:
     Ui::MainWindow *ui;
     QGraphicsScene *m_scene,*m_Rscene;
@@ -125,7 +129,7 @@ private:
     QString capteur1DataPath,capteur2DataPath,capteur3DataPath;
     QtCharts::QChartView *chartView ,*chartView1,*chartView2;
     QtCharts::QChart *chart1,*chart2,*chart3;
-    QGraphicsEllipseItem* circle1 ,*circle2 ,*circle3 ;
+    QGraphicsEllipseItem* circle1 ,*circle2 ,*circle3,*posCircle ;
     QPointF DPpoint;
 };
 #endif // MAINWINDOW_H
