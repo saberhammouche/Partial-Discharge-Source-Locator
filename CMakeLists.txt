@@ -29,7 +29,7 @@ set(PROJECT_SOURCES
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(myPfeApp
+    qt_add_executable(Partial-Discharge-Source-Locator
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
     )
@@ -39,7 +39,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
 # For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
 else()
     if(ANDROID)
-        add_library(myPfeApp SHARED
+        add_library(Partial-Discharge-Source-Locator SHARED
             ${PROJECT_SOURCES}
         )
 # Define properties for Android with Qt 5 after find_package() calls as:
@@ -51,9 +51,9 @@ else()
     endif()
 endif()
 
-target_link_libraries(myPfeApp PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Charts)
+target_link_libraries(Partial-Discharge-Source-Locator PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Charts)
 
-set_target_properties(myPfeApp PROPERTIES
+set_target_properties(Partial-Discharge-Source-Locator PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
@@ -61,7 +61,7 @@ set_target_properties(myPfeApp PROPERTIES
     WIN32_EXECUTABLE TRUE
 )
 
-install(TARGETS myPfeApp
+install(TARGETS Partial-Discharge-Source-Locator
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
