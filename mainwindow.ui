@@ -955,7 +955,7 @@ rectangle)</string>
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>502</width>
+            <width>528</width>
             <height>785</height>
            </rect>
           </property>
@@ -1249,7 +1249,7 @@ rectangle)</string>
                    <item>
                     <widget class="QLabel" name="label_39">
                      <property name="text">
-                      <string>samples:</string>
+                      <string>nombre d'échantillons:</string>
                      </property>
                     </widget>
                    </item>
@@ -1878,7 +1878,7 @@ rectangle)</string>
                    <item>
                     <widget class="QLabel" name="label_50">
                      <property name="text">
-                      <string>samples:</string>
+                      <string>nombre d'échantillons:</string>
                      </property>
                     </widget>
                    </item>
@@ -2503,7 +2503,7 @@ rectangle)</string>
                    <item>
                     <widget class="QLabel" name="label_64">
                      <property name="text">
-                      <string>samples:</string>
+                      <string>nombre d'échantillons:</string>
                      </property>
                     </widget>
                    </item>

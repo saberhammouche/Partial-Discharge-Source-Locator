@@ -122,39 +122,47 @@ void MainWindow::creatSquare(int width, int hight)
 
 QGenericMatrix<1, 2, double> MainWindow::calculateDP()
 {
-    double r1 = huileMap.value(ui->materiauxHuile->currentText()) * ui->label_dv->text().toDouble() /1000;        // mm
-    double r2 = huileMap.value(ui->materiauxHuile->currentText()) * ui->label_dv_2->text().toDouble() / 1000;     // mm
-    double r3 = huileMap.value(ui->materiauxHuile->currentText()) * ui->label_dv_3->text().toDouble() / 1000;     // mm
+    // Calculate the values of r1, r2, and r3
+    double r1 = huileMap.value(ui->materiauxHuile->currentText()) * ui->label_dv->text().toDouble() / 1000;
+    double r2 = huileMap.value(ui->materiauxHuile->currentText()) * ui->label_dv_2->text().toDouble() / 1000;
+    double r3 = huileMap.value(ui->materiauxHuile->currentText()) * ui->label_dv_3->text().toDouble() / 1000;
 
+    // Create matrices for calculations
     QGenericMatrix<2, 2, double> A;
     QGenericMatrix<1, 2, double> b;
     QGenericMatrix<2, 2, double> a_inv;
-    A(0,0) = ui->doubleSpinBox_cx2->value() - ui->doubleSpinBox_cx1->value();
-    A(0,1) = ui->doubleSpinBox_cy2->value() - ui->doubleSpinBox_cy1->value();
-    A(1,0) = ui->doubleSpinBox_cx3->value() - ui->doubleSpinBox_cx1->value();
-    A(1,1) = ui->doubleSpinBox_cy3->value() - ui->doubleSpinBox_cy1->value();
-    b(0,0) = 0.5*(pow(r1,2)-pow(r2,2)-(pow(ui->doubleSpinBox_cx1->value(),2)-pow(ui->doubleSpinBox_cx2->value(),2)
-                                       +pow(ui->doubleSpinBox_cy1->value(),2)-pow(ui->doubleSpinBox_cy2->value(),2)));
-    b(1,0) = 0.5*(pow(r1,2)-pow(r3,2)-(pow(ui->doubleSpinBox_cx1->value(),2)-pow(ui->doubleSpinBox_cx3->value(),2)
-                                       +pow(ui->doubleSpinBox_cy1->value(),2)-pow(ui->doubleSpinBox_cy3->value(),2)));
 
+    // Fill matrix A with values
+    A(0, 0) = ui->doubleSpinBox_cx2->value() - ui->doubleSpinBox_cx1->value();
+    A(0, 1) = ui->doubleSpinBox_cy2->value() - ui->doubleSpinBox_cy1->value();
+    A(1, 0) = ui->doubleSpinBox_cx3->value() - ui->doubleSpinBox_cx1->value();
+    A(1, 1) = ui->doubleSpinBox_cy3->value() - ui->doubleSpinBox_cy1->value();
+
+    // Calculate values for matrix b
+    b(0, 0) = 0.5 * (pow(r1, 2) - pow(r2, 2) - (pow(ui->doubleSpinBox_cx1->value(), 2) - pow(ui->doubleSpinBox_cx2->value(), 2)
+                                       + pow(ui->doubleSpinBox_cy1->value(), 2) - pow(ui->doubleSpinBox_cy2->value(), 2)));
+    b(1, 0) = 0.5 * (pow(r1, 2) - pow(r3, 2) - (pow(ui->doubleSpinBox_cx1->value(), 2) - pow(ui->doubleSpinBox_cx3->value(), 2)
+                                       + pow(ui->doubleSpinBox_cy1->value(), 2) - pow(ui->doubleSpinBox_cy3->value(), 2)));
+
+    // Calculate the determinant of matrix A
     double det = A(0, 0) * A(1, 1) - A(0, 1) * A(1, 0);
-     // //qDebug() << "A:" << A;
-     // //qDebug() << "b:" << b;
+
+    // Check if the determinant is not zero to proceed with calculations
     if (det != 0) {
+        // Calculate the inverse of matrix A
         a_inv(0, 0) = A(1, 1);
         a_inv(0, 1) = -A(0, 1);
         a_inv(1, 0) = -A(1, 0);
         a_inv(1, 1) = A(0, 0);
         a_inv /= det;
-
-        // Printing the inverse of the matrix
-         // //qDebug() << "Inverse of A:" << A;
     } else {
-         // //qDebug() << "The matrix is not invertible.";
+        // Handle the case when the matrix is not invertible
     }
+
+    // Perform the matrix multiplication to calculate the result
     QGenericMatrix<1, 2, double> result = a_inv * b;
-     // //qDebug() << "Result :" << result;
+
+    // Return the calculated result
     return result;
 }
 
@@ -321,11 +329,13 @@ void MainWindow::save()
 
 void MainWindow::open(QString filename)
 {
+
     QSettings settings(QCoreApplication::applicationDirPath()+"/files.ini",QSettings::IniFormat);
     if(!settings.childGroups().contains(filename)){
         QMessageBox::critical(nullptr,"Fichier introuvable", "Nous ne pouvons pas trouver ce fichier" + filename, QMessageBox::Ok);
         return;
     }
+    clearwindo();
     xData.clear();
     yData.clear();
     xData2.clear();
@@ -537,8 +547,7 @@ void MainWindow::setCapteurData(QString txt, int c)
 
         minValue2 = *minIt;
         maxValue2 = *maxIt;
-        double dvtime = xData[yData.indexOf(maxValue)];
-
+        double dvtime = xData2[yData2.indexOf(maxValue2)];
 
         ui->label_max_2->setText(QString::number(maxValue2));
         ui->label_min_2->setText(QString::number(minValue2));
